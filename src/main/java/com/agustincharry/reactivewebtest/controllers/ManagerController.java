@@ -31,8 +31,8 @@ public class ManagerController {
         Flux<Person> peopleFlux = getPeople();
 
         Flux<PersonWithCars> personWithCarsFlux = carFlux
-                .groupBy(c -> c.getOwnerId())
-                .flatMap(c -> c.collectList())
+                .groupBy(Car::getOwnerId)
+                .flatMap(Flux::collectList)
                 .map(carsByOwner -> {
                     String[] carIds = carsByOwner.stream().map(Car::getId).toArray(String[]::new);
                     String personName = "";
@@ -40,7 +40,15 @@ public class ManagerController {
                 });
 
 
-         return personWithCarsFlux;
+        Flux<Person> peopleWithCar = personWithCarsFlux.flatMap(person->getPerson(person.getPersonId()));
+
+        Flux<PersonWithCars> result = personWithCarsFlux.zipWith(peopleWithCar,(a,b)->
+             new PersonWithCars(a.getPersonId(), b.getName(), a.getCarIds())
+        );
+
+
+
+         return result;
 
     }
 
@@ -48,6 +56,12 @@ public class ManagerController {
         return client.get().uri("/car")
                 .retrieve()
                 .bodyToFlux(Car.class);
+    }
+
+    public Mono<Person> getPerson(String id){
+        return client.get().uri("/person/"+id)
+                .retrieve()
+                .bodyToMono(Person.class);
     }
 
     public Flux<Person> getPeople() {

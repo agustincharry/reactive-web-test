@@ -28,8 +28,6 @@ public class ManagerController {
     public Flux<PersonWithCars> index() {
         log.info("New request");
         Flux<Car> carFlux = getCars();
-        Flux<Person> peopleFlux = getPeople();
-
         Flux<PersonWithCars> personWithCarsFlux = carFlux
                 .groupBy(Car::getOwnerId)
                 .flatMap(Flux::collectList)
@@ -39,16 +37,14 @@ public class ManagerController {
                     return new PersonWithCars(carsByOwner.get(0).getOwnerId(), personName, carIds);
                 });
 
+        Flux<Person> peopleWithCar = personWithCarsFlux
+                .flatMap(person->getPerson(person.getPersonId()));
 
-        Flux<Person> peopleWithCar = personWithCarsFlux.flatMap(person->getPerson(person.getPersonId()));
+        Flux<PersonWithCars> result = personWithCarsFlux
+                .zipWith(peopleWithCar,(a,b)->
+                    new PersonWithCars(a.getPersonId(), b.getName(), a.getCarIds()));
 
-        Flux<PersonWithCars> result = personWithCarsFlux.zipWith(peopleWithCar,(a,b)->
-             new PersonWithCars(a.getPersonId(), b.getName(), a.getCarIds())
-        );
-
-
-
-         return result;
+        return result;
 
     }
 
@@ -62,12 +58,6 @@ public class ManagerController {
         return client.get().uri("/person/"+id)
                 .retrieve()
                 .bodyToMono(Person.class);
-    }
-
-    public Flux<Person> getPeople() {
-        return client.get().uri("/person")
-                .retrieve()
-                .bodyToFlux(Person.class);
     }
 
 }

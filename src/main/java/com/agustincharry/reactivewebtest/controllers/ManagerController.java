@@ -1,7 +1,7 @@
 package com.agustincharry.reactivewebtest.controllers;
 
 import com.agustincharry.reactivewebtest.models.Car;
-import com.agustincharry.reactivewebtest.models.CarPerson;
+import com.agustincharry.reactivewebtest.models.PersonWithCars;
 import com.agustincharry.reactivewebtest.models.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/manager")
@@ -21,37 +25,23 @@ public class ManagerController {
 
 
     @GetMapping
-    public Flux<CarPerson> index() {
+    public Flux<PersonWithCars> index() {
         log.info("New request");
         Flux<Car> carFlux = getCars();
         Flux<Person> peopleFlux = getPeople();
 
-        /*
-        Flux<CarPerson> newFlux = Flux.merge(carFlux, peopleFlux)
-                .map(c -> {
-                    String carBrand = "";
-                    String personId = "";
+        Flux<PersonWithCars> personWithCarsFlux = carFlux
+                .groupBy(c -> c.getOwnerId())
+                .flatMap(c -> c.collectList())
+                .map(carsByOwner -> {
+                    String[] carIds = carsByOwner.stream().map(Car::getId).toArray(String[]::new);
                     String personName = "";
-                    return new CarPerson(carBrand, personId, personName);
+                    return new PersonWithCars(carsByOwner.get(0).getOwnerId(), personName, carIds);
                 });
-        */
-        /*
-        Flux.merge(getCars(), getPeople())
-                .parallel()
-                .runOn(Schedulers.parallel())
-                .map(data -> {
-                    return new CarPerson();
-                })
-                .subscribe(data -> log.info(data.toString()));*/
-
-        //return getCars().zipWith (getPeople(), (a, b) -> new CarPerson(a.getBrand(), b.getId(), b.getName()));
-
-        //Flux<CarPerson> newFlux = carFlux.zipWith(peopleFlux, (c, p) -> c.getOwnerId() == p.getId());
 
 
-        return Flux.zip(carFlux, peopleFlux, (c, p) -> new CarPerson(c.getBrand(), p.getId(), p.getName()));
+         return personWithCarsFlux;
 
-        //return Flux.empty();
     }
 
     public Flux<Car> getCars() {

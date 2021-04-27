@@ -20,8 +20,9 @@ public class CarController {
     public Flux<Car> getAll() {
         log.info("New request");
         List<Car> list =new ArrayList<>();
-        list.add(new Car("Mazda", "red", "2"));
-        list.add(new Car("Ford", "Black", "1"));
+        list.add(new Car("1", "Mazda", "red", "2"));
+        list.add(new Car("2", "Ford", "Black", "1"));
+        list.add(new Car("3", "Renault", "White", "1"));
         //return Flux.fromIterable(list).delayElements(Duration.ofSeconds(5));
         return Flux.fromIterable(list);
     }

@@ -1,34 +1,28 @@
 package com.agustincharry.reactivewebtest.models;
 
-public class CarPerson {
-    private String carBrand;
+import java.util.Arrays;
+
+public class PersonWithCars {
     private String personId;
     private String personName;
+    private String[] carIds;
 
-    public CarPerson() {
+    public PersonWithCars() {
     }
 
-    public CarPerson(String carBrand, String personId, String personName) {
-        this.carBrand = carBrand;
+    public PersonWithCars(String personId, String personName, String[] carIds) {
         this.personId = personId;
         this.personName = personName;
+        this.carIds = carIds;
     }
 
     @Override
     public String toString() {
-        return "CarPerson{" +
-                ", carBrand='" + carBrand + '\'' +
-                ", personId='" + personId + '\'' +
-                ", personName='" + personName + '\'' +
+        return "PersonWithCars{" +
+                "personId='" + personId + '\'' +
+                "personName='" + personName + '\'' +
+                ", cars=" + Arrays.toString(carIds) +
                 '}';
-    }
-
-    public String getCarBrand() {
-        return carBrand;
-    }
-
-    public void setCarBrand(String carBrand) {
-        this.carBrand = carBrand;
     }
 
     public String getPersonId() {
@@ -37,6 +31,14 @@ public class CarPerson {
 
     public void setPersonId(String personId) {
         this.personId = personId;
+    }
+
+    public String[] getCarIds() {
+        return carIds;
+    }
+
+    public void setCarIds(String[] carIds) {
+        this.carIds = carIds;
     }
 
     public String getPersonName() {

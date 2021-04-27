@@ -1,6 +1,7 @@
 package com.agustincharry.reactivewebtest.models;
 
 public class Car {
+    private String id;
     private String brand;
     private String color;
     private String ownerId;
@@ -8,7 +9,8 @@ public class Car {
     public Car() {
     }
 
-    public Car(String brand, String color, String ownerId) {
+    public Car(String id, String brand, String color, String ownerId) {
+        this.id = id;
         this.brand = brand;
         this.color = color;
         this.ownerId = ownerId;
@@ -17,7 +19,8 @@ public class Car {
     @Override
     public String toString() {
         return "Car{" +
-                "brand='" + brand + '\'' +
+                "id='" + id + '\'' +
+                ", brand='" + brand + '\'' +
                 ", color='" + color + '\'' +
                 ", ownerId='" + ownerId + '\'' +
                 '}';
@@ -45,5 +48,13 @@ public class Car {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

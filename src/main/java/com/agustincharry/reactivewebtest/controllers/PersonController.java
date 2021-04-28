@@ -26,13 +26,13 @@ public class PersonController {
 
     @GetMapping
     public Flux<Person> getAll() {
-        log.info("New request");
+        log.info("New request - Get all people");
         return Flux.fromIterable(list);
     }
 
     @GetMapping("/{id}")
     public Mono<Person> getById(@PathVariable String id){
-        log.info("New request");
+        log.info("New request - Get one person");
         return Flux.fromIterable(list)
                 .filter((e)-> id.equals(e.getId()))
                 .single();

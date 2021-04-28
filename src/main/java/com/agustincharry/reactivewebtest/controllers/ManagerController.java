@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.javatuples.Pair;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/manager")
@@ -27,25 +25,19 @@ public class ManagerController {
     @GetMapping
     public Flux<PersonWithCars> index() {
         log.info("New request");
+
         Flux<Car> carFlux = getCars();
-        Flux<PersonWithCars> personWithCarsFlux = carFlux
+
+        return carFlux
                 .groupBy(Car::getOwnerId)
                 .flatMap(Flux::collectList)
                 .map(carsByOwner -> {
                     String[] carIds = carsByOwner.stream().map(Car::getId).toArray(String[]::new);
-                    String personName = "";
-                    return new PersonWithCars(carsByOwner.get(0).getOwnerId(), personName, carIds);
+                    return new Pair<>(carsByOwner.get(0).getOwnerId(), carIds);
+                }).flatMap(tuple -> {
+                    return getPerson(tuple.getValue0())
+                            .flatMap(p -> Mono.just(new PersonWithCars(tuple.getValue0(), p.getName(), tuple.getValue1())));
                 });
-
-        Flux<Person> peopleWithCar = personWithCarsFlux
-                .flatMap(person->getPerson(person.getPersonId()));
-
-        Flux<PersonWithCars> result = personWithCarsFlux
-                .zipWith(peopleWithCar,(a,b)->
-                    new PersonWithCars(a.getPersonId(), b.getName(), a.getCarIds()));
-
-        return result;
-
     }
 
     public Flux<Car> getCars() {
@@ -58,6 +50,12 @@ public class ManagerController {
         return client.get().uri("/person/"+id)
                 .retrieve()
                 .bodyToMono(Person.class);
+    }
+
+    public Flux<Person> getPeople(){
+        return client.get().uri("/person")
+                .retrieve()
+                .bodyToFlux(Person.class);
     }
 
 }

@@ -48,3 +48,10 @@ public class PersonWithCars {
 ## Client APIs
 
 * ```/manager``` **The main challenge!** Having the server APIs, return a populated list of ```PersonWithCars```
+
+
+## Build the .jar file
+Run
+```
+gradle clean build
+```
